@@ -1,7 +1,6 @@
 {
   "framework": "nextjs",
-  "buildCommand": "npx prisma generate && npm run build",
-  "outputDirectory": ".next",
+  "buildCommand": "node scripts/detect-db.js && npx prisma generate && npm run build",
   "installCommand": "npm install",
   "env": {
     "NEXT_PUBLIC_APP_URL": "https://forgeflow.vercel.app"

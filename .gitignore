@@ -45,3 +45,5 @@ saas_config.json
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+.vercel
