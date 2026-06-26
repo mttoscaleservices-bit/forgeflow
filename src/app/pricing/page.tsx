@@ -5,7 +5,7 @@ import Link from "next/link"
 import { useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
-import { PLANS } from "@/lib/stripe"
+import { PLANS } from "@/lib/plans"
 import { Check, Sparkles, ArrowRight } from "lucide-react"
 
 export default function PricingPage() {
@@ -83,7 +83,7 @@ export default function PricingPage() {
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             {([PLANS.free, PLANS.pro, PLANS.enterprise] as const).map((plan, i) => {
               const price = annual ? Math.round(plan.price * 0.8) : plan.price
-              const priceId = annual ? `${plan.priceId}_annual` : plan.priceId
+              const priceId = plan.priceId ? (annual ? plan.priceId.annual : plan.priceId.monthly) : null
 
               return (
                 <Card key={plan.name} className={`relative ${i === 1 ? "border-violet-500 shadow-xl shadow-violet-500/10 scale-105" : ""}`}>

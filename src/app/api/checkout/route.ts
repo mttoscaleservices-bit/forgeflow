@@ -31,7 +31,7 @@ export async function POST(req: Request) {
       line_items: [{ price: priceId, quantity: 1 }],
       success_url: absoluteUrl("/dashboard?success=true"),
       cancel_url: absoluteUrl("/pricing?canceled=true"),
-      metadata: { userId: user.id },
+      metadata: { userId: user.id, priceId },
     })
 
     return NextResponse.json({ url: checkoutSession.url })

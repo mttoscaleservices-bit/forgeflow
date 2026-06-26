@@ -3,8 +3,19 @@ import { NextAuthProvider } from "@/providers/session-provider"
 import "./globals.css"
 
 export const metadata: Metadata = {
-  title: "ForgeFlow - Build Better Products",
+  title: { default: "ForgeFlow - Build Better Products", template: "%s | ForgeFlow" },
   description: "The all-in-one platform for modern teams to build, ship, and scale products faster than ever.",
+  openGraph: {
+    title: "ForgeFlow - Build Better Products",
+    description: "The all-in-one platform for modern teams to build, ship, and scale products faster than ever.",
+    type: "website",
+    url: process.env.NEXT_PUBLIC_APP_URL,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "ForgeFlow - Build Better Products",
+    description: "The all-in-one platform for modern teams to build, ship, and scale products faster than ever.",
+  },
 }
 
 export default function RootLayout({

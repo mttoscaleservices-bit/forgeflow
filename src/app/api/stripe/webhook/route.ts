@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { PRICE_TO_PLAN } from "@/lib/plans"
 import { stripe } from "@/lib/stripe"
 import { prisma } from "@/lib/db"
 
@@ -16,8 +17,12 @@ export async function POST(req: Request) {
     if (event.type === "checkout.session.completed") {
       const session = event.data.object as any
       const userId = session.metadata?.userId
+      const priceId = session.metadata?.priceId
+      const plan = priceId ? (PRICE_TO_PLAN[priceId] || "pro") : "pro"
 
       if (userId) {
+        const sub = (await stripe.subscriptions.retrieve(session.subscription as string)) as any
+
         await prisma.user.update({
           where: { id: userId },
           data: { stripeCustomerId: session.customer as string },
@@ -28,16 +33,56 @@ export async function POST(req: Request) {
           update: {
             stripeId: session.subscription as string,
             status: "active",
-            plan: "pro",
-            periodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+            plan,
+            periodEnd: new Date(sub.current_period_end * 1000),
           },
           create: {
             userId,
             stripeId: session.subscription as string,
             status: "active",
-            plan: "pro",
+            plan,
+            periodEnd: new Date(sub.current_period_end * 1000),
           },
         })
+      }
+    }
+
+    if (event.type === "invoice.paid") {
+      const invoice = event.data.object as any
+      const subscriptionId = invoice.subscription as string
+
+      if (subscriptionId) {
+        const sub = (await stripe.subscriptions.retrieve(subscriptionId)) as any
+        const customerId = typeof sub.customer === "string" ? sub.customer : sub.customer?.id
+        const user = await prisma.user.findFirst({ where: { stripeCustomerId: customerId } })
+
+        if (user) {
+          await prisma.subscription.update({
+            where: { userId: user.id },
+            data: {
+              status: "active",
+              periodEnd: new Date(sub.current_period_end * 1000),
+            },
+          })
+        }
+      }
+    }
+
+    if (event.type === "invoice.payment_failed") {
+      const invoice = event.data.object as any
+      const subscriptionId = invoice.subscription as string
+
+      if (subscriptionId) {
+        const sub = (await stripe.subscriptions.retrieve(subscriptionId)) as any
+        const customerId = typeof sub.customer === "string" ? sub.customer : sub.customer?.id
+        const user = await prisma.user.findFirst({ where: { stripeCustomerId: customerId } })
+
+        if (user) {
+          await prisma.subscription.update({
+            where: { userId: user.id },
+            data: { status: "past_due" },
+          })
+        }
       }
     }
 

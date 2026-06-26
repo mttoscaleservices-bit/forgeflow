@@ -1,13 +1,21 @@
 "use client"
 
+import { Suspense, useEffect, useState } from "react"
 import { useSession, signOut } from "next-auth/react"
-import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Sparkles, LogOut, BarChart3, Zap, Users, Settings, Activity, ArrowRight } from "lucide-react"
+import { Sparkles, LogOut, BarChart3, Zap, Users, Settings, Activity, ArrowRight, CheckCircle, CreditCard } from "lucide-react"
+
+type SubscriptionInfo = {
+  plan: string
+  planName: string
+  status: string
+  periodEnd: string | null
+  stripeCustomerId: string | null
+}
 
 const statCards = [
   { label: "Active Projects", value: "3", icon: BarChart3, change: "+2 this month", color: "from-violet-600 to-indigo-600" },
@@ -24,9 +32,21 @@ const recentActivity = [
 ]
 
 export default function DashboardPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-zinc-950"><div className="flex items-center gap-2 text-zinc-500"><Sparkles className="h-5 w-5 animate-spin" />Loading...</div></div>}>
+      <DashboardContent />
+    </Suspense>
+  )
+}
+
+function DashboardContent() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [greeting, setGreeting] = useState("")
+  const [sub, setSub] = useState<SubscriptionInfo | null>(null)
+  const [portalLoading, setPortalLoading] = useState(false)
+  const [banner, setBanner] = useState<string | null>(null)
 
   useEffect(() => {
     const hour = new Date().getHours()
@@ -36,10 +56,36 @@ export default function DashboardPage() {
   }, [])
 
   useEffect(() => {
+    if (searchParams.get("success") === "true") {
+      setBanner("Subscription activated successfully! Welcome aboard.")
+    }
+  }, [searchParams])
+
+  useEffect(() => {
+    if (status === "authenticated") {
+      fetch("/api/user/subscription")
+        .then((r) => r.json())
+        .then((data) => setSub(data))
+        .catch(() => {})
+    }
+  }, [status])
+
+  useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/auth/login")
     }
   }, [status, router])
+
+  async function handlePortal() {
+    setPortalLoading(true)
+    try {
+      const res = await fetch("/api/portal")
+      const data = await res.json()
+      if (data.url) window.location.href = data.url
+    } finally {
+      setPortalLoading(false)
+    }
+  }
 
   if (status === "loading") {
     return (
@@ -105,12 +151,23 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between px-6 h-16">
             <div>
               <h2 className="text-lg font-semibold">{greeting}, {session.user?.name || "there"}</h2>
-              <p className="text-sm text-zinc-500">Here&apos;s what&apos;s happening today.</p>
+              <p className="text-sm text-zinc-500">
+                {sub?.plan === "free"
+                  ? "You're on the Free plan."
+                  : `${sub?.planName} plan · ${sub?.status === "active" ? "Active" : sub?.status}`}
+              </p>
             </div>
             <div className="flex items-center gap-4">
-              <Link href="/pricing">
-                <Button variant="gradient" size="sm">Upgrade Plan</Button>
-              </Link>
+              {sub?.plan !== "free" && sub?.stripeCustomerId ? (
+                <Button variant="outline" size="sm" onClick={handlePortal} disabled={portalLoading}>
+                  <CreditCard className="h-4 w-4 mr-2" />
+                  {portalLoading ? "Loading..." : "Manage Subscription"}
+                </Button>
+              ) : (
+                <Link href="/pricing">
+                  <Button variant="gradient" size="sm">Upgrade Plan</Button>
+                </Link>
+              )}
               <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => signOut()}>
                 <LogOut className="h-4 w-4" />
               </Button>
@@ -119,6 +176,14 @@ export default function DashboardPage() {
         </header>
 
         <main className="p-6">
+          {banner && (
+            <div className="mb-6 flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-950/50 px-4 py-3 text-sm text-emerald-800 dark:text-emerald-200">
+              <CheckCircle className="h-5 w-5 shrink-0" />
+              {banner}
+              <button className="ml-auto text-emerald-600 hover:text-emerald-800" onClick={() => setBanner(null)}>×</button>
+            </div>
+          )}
+
           {/* Stats */}
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             {statCards.map((stat) => (
