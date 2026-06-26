@@ -281,15 +281,40 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Newsletter */}
+      <section className="border-t border-zinc-200 dark:border-zinc-800 py-16">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
+          <h3 className="text-2xl font-bold">Stay in the loop</h3>
+          <p className="mt-2 text-zinc-600 dark:text-zinc-400">Get product updates and exclusive offers.</p>
+          <form
+            onSubmit={(e) => { e.preventDefault(); alert("Thanks for subscribing!") }}
+            className="mt-6 mx-auto flex max-w-md gap-3"
+          >
+            <input
+              type="email"
+              placeholder="you@example.com"
+              required
+              className="flex h-11 w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:ring-offset-2 dark:border-zinc-700 dark:bg-zinc-900 dark:ring-offset-zinc-900 dark:placeholder:text-zinc-400"
+            />
+            <Button type="submit" className="shrink-0 h-11">Subscribe</Button>
+          </form>
+        </div>
+      </section>
+
       {/* Footer */}
       <footer className="border-t border-zinc-200 dark:border-zinc-800 py-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-2">
               <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center">
                 <Sparkles className="h-4 w-4 text-white" />
               </div>
               <span className="text-lg font-bold">ForgeFlow</span>
+            </div>
+            <div className="flex items-center gap-6 text-sm text-zinc-500">
+              <Link href="/pricing" className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">Pricing</Link>
+              <Link href="/privacy" className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">Privacy</Link>
+              <Link href="/terms" className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">Terms</Link>
             </div>
             <p className="text-sm text-zinc-500">© 2024 ForgeFlow. All rights reserved.</p>
           </div>

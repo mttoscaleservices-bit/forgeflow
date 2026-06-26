@@ -1,5 +1,7 @@
 import type { Metadata } from "next"
 import { NextAuthProvider } from "@/providers/session-provider"
+import { GoogleAnalytics } from "@/components/GoogleAnalytics"
+import { CookieConsent } from "@/components/CookieConsent"
 import "./globals.css"
 
 export const metadata: Metadata = {
@@ -29,6 +31,8 @@ export default function RootLayout({
         <NextAuthProvider>
           {children}
         </NextAuthProvider>
+        <GoogleAnalytics />
+        <CookieConsent />
       </body>
     </html>
   )
