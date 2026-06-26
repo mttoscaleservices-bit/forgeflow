@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { NextAuthProvider } from "@/providers/session-provider"
 import { GoogleAnalytics } from "@/components/GoogleAnalytics"
 import { CookieConsent } from "@/components/CookieConsent"
+import { Analytics } from "@vercel/analytics/react"
 import "./globals.css"
 
 export const metadata: Metadata = {
@@ -32,6 +33,7 @@ export default function RootLayout({
           {children}
         </NextAuthProvider>
         <GoogleAnalytics />
+        <Analytics />
         <CookieConsent />
       </body>
     </html>
