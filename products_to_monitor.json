@@ -1,0 +1,12 @@
+[
+  {
+    "name": "Example SaaS Pro",
+    "url": "https://example.com/pricing",
+    "selector": ".price-amount"
+  },
+  {
+    "name": "Another Tool",
+    "url": "https://example.org/plans",
+    "selector": ".plan-price"
+  }
+]
